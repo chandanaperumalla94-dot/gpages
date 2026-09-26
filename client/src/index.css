@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-paper text-ink font-body antialiased;
+    background-image: radial-gradient(circle at top right, rgba(20, 184, 166, 0.07), transparent 30rem);
+  }
+  ::selection {
+    @apply bg-marigold/30;
+  }
+  :focus-visible {
+    outline: 2px solid #14B8A6;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .surface-card {
+    @apply border border-line bg-white shadow-[0_10px_30px_rgba(16,42,67,0.06)];
+  }
+
+  .home-hero-image {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  .home-hero-shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgba(3, 23, 49, .96) 0%, rgba(4, 37, 68, .88) 42%, rgba(4, 37, 68, .3) 100%);
+  }
+  .home-hero::after {
+    position: absolute;
+    right: -7rem;
+    top: -7rem;
+    z-index: -1;
+    height: 23rem;
+    width: 23rem;
+    border-radius: 9999px;
+    background: rgba(34, 211, 238, .14);
+    content: '';
+    filter: blur(12px);
+  }
+  .home-city-slide { animation: home-city-reveal .65s ease-out both; }
+  @keyframes home-city-reveal { from { opacity: .35; transform: scale(1.035); } to { opacity: 1; transform: scale(1); } }
+  @media (max-width: 1024px) {
+    .home-hero-shade { background: linear-gradient(90deg, rgba(3, 23, 49, .95), rgba(4, 37, 68, .75)); }
+  }
+
+  .city-hero { background: #eff7ff; }
+  /* The image sits inside .container-page, so it always scales with the page content. */
+  .city-hero-background {
+    position: absolute;
+    inset: 0 0 0 40%;
+    width: 60%;
+    height: 100%;
+    max-width: 100%;
+    object-fit: cover;
+    object-position: center 55%;
+    opacity: .58;
+  }
+  .city-hero-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(239,247,255,.99) 0%, rgba(239,247,255,.95) 36%, rgba(239,247,255,.28) 100%); }
+  @media (max-width: 768px) {
+    .city-hero-background { inset: 0 0 0 25%; width: 75%; opacity: .42; }
+    .city-hero-overlay { background: linear-gradient(90deg, rgba(239,247,255,.98) 0%, rgba(239,247,255,.82) 56%, rgba(239,247,255,.38) 100%); }
+  }
+  @media (max-width: 640px) {
+    .city-hero-background { inset: 0; width: 100%; opacity: .18; }
+    .city-hero-overlay { background: rgba(239,247,255,.83); }
+  }
+}
+
+@layer utilities {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+  }
+
+  .restaurant-profile [id] {
+    scroll-margin-top: 6rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
