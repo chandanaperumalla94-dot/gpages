@@ -1209,7 +1209,7 @@ function SchoolDetailLayout({ place, mapsUrl, socialLinks, academics, onShare, o
   );
 }
 
-export default function PlaceDetailPage() {
+export default function PlaceDetailPage({ onRetailProfileLoad }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -1222,10 +1222,21 @@ export default function PlaceDetailPage() {
     setLoading(true);
     api
       .get(`/places/${id}`)
-      .then(({ data }) => setPlace(data.data))
-      .catch((err) => setError(err.message))
+      .then(({ data }) => {
+        const loadedPlace = data.data;
+        setPlace(loadedPlace);
+        const retailName = String(loadedPlace.subcategory?.name || loadedPlace.category?.name || '')
+          .toLowerCase()
+          .replace(/[-_]/g, ' ')
+          .trim();
+        onRetailProfileLoad?.(id, ['shopping malls', 'boutique', 'home appliances', 'furniture shops', 'mattress shops', 'nurseries'].includes(retailName));
+      })
+      .catch((err) => {
+        setError(err.message);
+        onRetailProfileLoad?.(id, false);
+      })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, onRetailProfileLoad]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -1448,6 +1459,17 @@ export default function PlaceDetailPage() {
   return (
     <div className="container-page py-8">
       <div className="space-y-6">
+        {isShoppingCategory && (
+          <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-white px-5 py-4 shadow-sm">
+            <Link to="#top" className="font-display text-xl font-semibold text-ink">{place.name}</Link>
+            <nav className="flex flex-wrap items-center gap-4 text-sm text-ink/65">
+              <a href="#collections" className="hover:text-ink">Collections</a>
+              <a href="#services" className="hover:text-ink">Services</a>
+              <a href="#contact" className="hover:text-ink">Contact</a>
+            </nav>
+            {place.phone && <a href={`tel:${place.phone}`} className="rounded-lg bg-[#b77b4f] px-4 py-2 text-sm font-semibold text-white">Call shop</a>}
+          </header>
+        )}
         <section className="overflow-hidden rounded-[30px] border border-[#e9dcc7] bg-[#f5efe8] shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
           <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
             <div className="flex flex-col justify-center p-8 lg:p-12">
@@ -1466,7 +1488,7 @@ export default function PlaceDetailPage() {
           </div>
         </section>
 
-        <section className="rounded-[24px] border border-line bg-[#f8f7f4] p-5 shadow-[0_10px_20px_rgba(15,23,42,0.04)]">
+        <section id="collections" className="rounded-[24px] border border-line bg-[#f8f7f4] p-5 shadow-[0_10px_20px_rgba(15,23,42,0.04)]">
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="font-display text-3xl font-semibold text-ink">Our Collections</h2>
             <span className="text-sm text-ink/50">Explore our range</span>
@@ -1500,7 +1522,7 @@ export default function PlaceDetailPage() {
           </div>
         </section>
 
-        <section className="rounded-[24px] border border-line bg-[#f8f7f4] p-6 shadow-[0_10px_20px_rgba(15,23,42,0.04)]">
+        <section id="services" className="rounded-[24px] border border-line bg-[#f8f7f4] p-6 shadow-[0_10px_20px_rgba(15,23,42,0.04)]">
           <div className="mb-5 flex items-center justify-between gap-3">
             <h3 className="font-display text-3xl font-semibold text-ink">New Arrivals</h3>
             <button onClick={handleShare} className="text-sm text-ink/60 hover:text-ink">View all →</button>
@@ -1531,7 +1553,7 @@ export default function PlaceDetailPage() {
           </div>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-2">
+        <section id="contact" className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-[24px] border border-line bg-[#f8f7f4] p-6 shadow-[0_10px_20px_rgba(15,23,42,0.04)]">
             <h3 className="font-display text-3xl font-semibold text-ink">Directions</h3>
             <div className="mt-4 space-y-3 text-sm text-ink/75">
@@ -1561,6 +1583,14 @@ export default function PlaceDetailPage() {
         <section id="reviews" className="rounded-[24px] border border-line bg-[#f8f7f4] p-6 shadow-[0_10px_20px_rgba(15,23,42,0.04)]">
           <ReviewsSection placeId={place._id} />
         </section>
+
+        {isShoppingCategory && (
+          <footer className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#241b17] px-5 py-5 text-sm text-white/75">
+            <span className="font-semibold text-white">{place.name}</span>
+            <span>{place.address}</span>
+            <span>© {new Date().getFullYear()} {place.name}</span>
+          </footer>
+        )}
       </div>
 
       {showReport && <ReportModal placeId={place._id} onClose={() => setShowReport(false)} />}

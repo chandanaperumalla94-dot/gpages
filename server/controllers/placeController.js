@@ -113,17 +113,21 @@ const getPlaces = async (req, res, next) => {
     const filter = { status: 'approved' };
     if (city) filter['location.city'] = city;
     if (area) filter['location.area'] = area;
-    if (category) filter.category = category;
+    if (category) {
+      filter.$and = [{ $or: [{ category }, { subcategory: category }] }];
+    }
     if (verified === 'true') filter.verified = true;
     if (rating) filter['rating.average'] = { $gte: Number(rating) };
     if (q) {
-      filter.$or = [
+      const textMatch = { $or: [
         { $text: { $search: q } },
         { name: { $regex: q, $options: 'i' } },
         { address: { $regex: q, $options: 'i' } },
         { description: { $regex: q, $options: 'i' } },
         { services: { $regex: q, $options: 'i' } },
-      ];
+      ] };
+      if (filter.$and) filter.$and.push(textMatch);
+      else filter.$or = textMatch.$or;
     }
 
     // Category-specific attribute filters: attr[board]=CBSE&attr[emergency]=true
@@ -187,8 +191,8 @@ const getPlaceById = async (req, res, next) => {
       return next(new AppError('Listing not found.', 404));
     }
 
+    await Place.updateOne({ _id: place._id }, { $inc: { views: 1 } });
     place.views += 1;
-    await place.save();
 
     if (req.user) {
       const User = require('../models/User');
