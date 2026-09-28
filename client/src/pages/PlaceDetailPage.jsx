@@ -1277,6 +1277,13 @@ export default function PlaceDetailPage() {
   const isFurnitureShopCategory = /furniture|furniture shop|wardrobe|sofa|bedroom|dining room|office furniture|custom furniture/.test(categoryMatches(place.subcategory?.name || place.category?.name));
   const isMattressShopCategory = /mattress|mattress shop|mattresses|sleep|bed/.test(categoryMatches(place.subcategory?.name || place.category?.name));
   const isNurseryCategory = /nursery|nurseries|plant|plants|garden|gardening|flower shop|flowers|seed|soil/.test(categoryMatches(place.subcategory?.name || place.category?.name));
+  const categoryFacilityDefaults = isHomeAppliancesCategory
+    ? ['Product demonstration area', 'Installation service', 'Repair and maintenance support', 'Home delivery', 'Warranty assistance', 'EMI and digital payments']
+    : isFurnitureShopCategory
+      ? ['Furniture display showroom', 'Custom design and measurements', 'Home delivery', 'Assembly and installation', 'Interior consultation', 'EMI and digital payments']
+      : isMattressShopCategory
+        ? ['Mattress trial area', 'Sleep comfort consultation', 'Custom size options', 'Home delivery', 'Old mattress exchange', 'Warranty support']
+        : null;
 
   if (isSchoolCategory) {
     return (
@@ -1388,7 +1395,7 @@ export default function PlaceDetailPage() {
         'Digital payments',
       ];
 
-  const defaultFacilities = isShoppingCategory
+  const defaultFacilities = categoryFacilityDefaults || (isShoppingCategory
     ? shoppingMallFacilities
     : [
         'Easy access',
@@ -1397,7 +1404,7 @@ export default function PlaceDetailPage() {
         'Free parking',
         'Family seating',
         '24/7 assistance',
-      ];
+      ]);
 
   const displayServices = place.services?.length ? place.services : defaultServices;
   const displayFacilities = place.facilities?.length ? place.facilities : defaultFacilities;
